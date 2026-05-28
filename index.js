@@ -1,8 +1,15 @@
 require('dotenv').config();
 
+const fs =
+require('fs');
+
+const path =
+require('path');
+
 const {
   Client,
   GatewayIntentBits,
+  Collection,
   Events
 } = require('discord.js');
 
@@ -15,14 +22,78 @@ new Client({
 
 });
 
+client.commands =
+new Collection();
+
+/* =========================
+   LOAD COMMANDS
+========================= */
+
+const commandsPath =
+path.join(
+  __dirname,
+  'commands'
+);
+
+const commandFiles =
+fs.readdirSync(commandsPath)
+
+.filter(file =>
+  file.endsWith('.js')
+);
+
+for(
+  const file of commandFiles
+){
+
+  const filePath =
+  path.join(
+    commandsPath,
+    file
+  );
+
+  const command =
+  require(filePath);
+
+  client.commands.set(
+    command.name,
+    command
+  );
+
+}
+
 /* =========================
    READY
 ========================= */
 
-client.once('ready', () => {
+client.once('ready', async () => {
 
   console.log(
     `${client.user.tag} online`
+  );
+
+  /* =====================
+     REGISTER COMMANDS
+  ===================== */
+
+  const slashCommands =
+
+  client.commands.map(command => ({
+
+    name:command.name,
+
+    description:
+    command.description
+
+  }));
+
+  await client.application
+  .commands.set(
+    slashCommands
+  );
+
+  console.log(
+    'โหลดคำสั่งสำเร็จ'
   );
 
 });
@@ -41,74 +112,22 @@ client.on(
       !interaction.isChatInputCommand()
     ) return;
 
-    /* =====================
-       PING
-    ===================== */
+    const command =
+    client.commands.get(
+      interaction.commandName
+    );
 
-    if(
-      interaction.commandName ===
-      'ping'
-    ){
+    if(!command) return;
 
-      await interaction.reply(
-        'pong 🏓'
+    try{
+
+      await command.execute(
+        interaction
       );
 
-    }
+    }catch(err){
 
-    /* =====================
-       STATUS
-    ===================== */
-
-    if(
-      interaction.commandName ===
-      'status'
-    ){
-
-      await interaction.reply({
-
-        content:
-        '🟢 ระบบออนไลน์',
-
-        ephemeral:true
-
-      });
-
-    }
-
-    /* =====================
-       BUY
-    ===================== */
-
-    if(
-      interaction.commandName ===
-      'buy'
-    ){
-
-      await interaction.reply({
-
-        content:
-        '🟢 เปิด Buy XAUUSD สำเร็จ'
-
-      });
-
-    }
-
-    /* =====================
-       SELL
-    ===================== */
-
-    if(
-      interaction.commandName ===
-      'sell'
-    ){
-
-      await interaction.reply({
-
-        content:
-        '🔴 เปิด Sell XAUUSD สำเร็จ'
-
-      });
+      console.log(err);
 
     }
 

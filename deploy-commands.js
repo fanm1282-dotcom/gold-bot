@@ -6,6 +6,10 @@ const {
   SlashCommandBuilder
 } = require('discord.js');
 
+/* =========================
+   COMMANDS
+========================= */
+
 const commands = [
 
   new SlashCommandBuilder()
@@ -18,6 +22,18 @@ const commands = [
     .setName('status')
     .setDescription(
       'เช็คระบบ'
+    ),
+
+  new SlashCommandBuilder()
+    .setName('buy')
+    .setDescription(
+      'เปิด Buy XAUUSD'
+    ),
+
+  new SlashCommandBuilder()
+    .setName('sell')
+    .setDescription(
+      'เปิด Sell XAUUSD'
     )
 
 ]
@@ -26,12 +42,20 @@ const commands = [
   command.toJSON()
 );
 
+/* =========================
+   REST
+========================= */
+
 const rest =
 new REST({ version:'10' })
 
 .setToken(
   process.env.TOKEN
 );
+
+/* =========================
+   DEPLOY
+========================= */
 
 (async () => {
 
